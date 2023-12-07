@@ -64,8 +64,8 @@ def _init_vinn(cfg):
 def _init_model(cfg):
     model = hydra.utils.instantiate(cfg.model)
     model = model.to(cfg.device)
-    checkpoint = torch.load(cfg.model_weight_pth, map_location=cfg.device)
-    model.load_state_dict(checkpoint["model"])
+    # checkpoint = torch.load(cfg.model_weight_pth, map_location=cfg.device)
+    # model.load_state_dict(checkpoint["model"])
     return model
 
 

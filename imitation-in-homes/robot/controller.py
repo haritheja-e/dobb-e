@@ -34,14 +34,14 @@ class Controller:
     def __init__(self, cfg=None, frequency: int = 10):
         global schedule
         publisher = ImitiationPolicyPublisher()
-        # subscriber = ImagePolicySubscriber()
+        subscriber = ImagePolicySubscriber()
 
         self.publisher = publisher
-        # self.subscriber = subscriber
+        self.subscriber = subscriber
         self.frequency = frequency
 
-        # self.subscriber.register_for_uid(self.publisher)
-        # self.subscriber.register_for_uid(self)
+        self.subscriber.register_for_uid(self.publisher)
+        self.subscriber.register_for_uid(self)
 
         self.cfg = cfg
         self.use_depth = cfg["use_depth"]
@@ -258,8 +258,8 @@ class Controller:
 
     def _wait_for_publisher_subscriber(self):
         print("Waiting for publisher and subscriber to be ready..")
-        # while hasattr(self.publisher, "uid") is False:
-        #     time.sleep(1)
+        while hasattr(self.publisher, "uid") is False:
+            time.sleep(1)
         print("Publisher and subscriber ready..")
 
     def run(self):
