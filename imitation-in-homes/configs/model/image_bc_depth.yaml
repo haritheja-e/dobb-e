@@ -13,7 +13,7 @@ encoder:
 
 # Path to encoder weights. You can download it from the link below.
 # https://dl.dobb-e.com/models/hpr_model.pt
-enc_weight_pth: /path/to/encoder/weights/hpr_model.pt
+enc_weight_pth: null
 model_weight_pth: null
 use_depth: ${use_depth}
 depth_patch_dim: 4

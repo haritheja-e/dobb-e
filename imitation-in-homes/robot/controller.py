@@ -34,14 +34,14 @@ class Controller:
     def __init__(self, cfg=None, frequency: int = 10):
         global schedule
         publisher = ImitiationPolicyPublisher()
-        subscriber = ImagePolicySubscriber()
+        # subscriber = ImagePolicySubscriber()
 
         self.publisher = publisher
-        self.subscriber = subscriber
+        # self.subscriber = subscriber
         self.frequency = frequency
 
-        self.subscriber.register_for_uid(self.publisher)
-        self.subscriber.register_for_uid(self)
+        # self.subscriber.register_for_uid(self.publisher)
+        # self.subscriber.register_for_uid(self)
 
         self.cfg = cfg
         self.use_depth = cfg["use_depth"]
@@ -51,7 +51,7 @@ class Controller:
         else:
             self.async_saver = AsyncImageDepthActionSaver(cfg["image_save_dir"])
 
-        self.image_action_buffer_manager = self.create_buffer_manager()
+        # self.image_action_buffer_manager = self.create_buffer_manager()
 
         self.device = cfg["device"]
         schedule = schedule_init(
@@ -121,32 +121,34 @@ class Controller:
         while run_for > 0:
             rate.sleep()
 
-            cv2_img = self.subscriber.get_image()
-            self.image_action_buffer_manager.add_image(cv2_img)
+            # cv2_img = self.subscriber.get_image()
+            # self.image_action_bufimage_action_buffer_managerfer_manager.add_image(cv2_img)
 
-            with torch.no_grad():
-                input_tensor_sequence = (
-                    self.image_action_buffer_manager.get_input_tensor_sequence()
-                )
+            # with torch.no_grad():
+                # input_tensor_sequence = (
+                #     self.image_action_buffer_manager.get_input_tensor_sequence()
+                # )
 
-                input_tensor_sequence = (
-                    input_tensor_sequence[0].to(self.device).unsqueeze(0),
-                    input_tensor_sequence[1].to(self.device).unsqueeze(0),
-                )
+                # input_tensor_sequence = (
+                #     input_tensor_sequence[0].to(self.device).unsqueeze(0),
+                #     input_tensor_sequence[1].to(self.device).unsqueeze(0),
+                # )
 
-                action_tensor, logs = self.model.step(input_tensor_sequence)
-                if "indices" in logs:
-                    indices = logs["indices"].squeeze()
-                    for nbhr, idx in enumerate(indices):
-                        img = self.model.train_dataset[idx]
-                        img = (
-                            (img[0][0]).permute(1, 2, 0).cpu().numpy().astype(np.uint8)
-                        )
-                        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                        self.async_saver.save_image(img, nbhr=nbhr)
-                action_tensor = action_tensor.squeeze(0).cpu()
-                self.image_action_buffer_manager.add_action(action_tensor)
-                action_tensor = action_tensor.squeeze().numpy()
+                # action_tensor, logs = self.model.step(input_tensor_sequence)
+                # if "indices" in logs:
+                #     indices = logs["indices"].squeeze()
+                #     for nbhr, idx in enumerate(indices):
+                #         img = self.model.train_dataset[idx]
+                #         img = (
+                #             (img[0][0]).permute(1, 2, 0).cpu().numpy().astype(np.uint8)
+                #         )
+                #         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                #         self.async_saver.save_image(img, nbhr=nbhr)
+                # action_tensor = action_tensor.squeeze(0).cpu()
+                # self.image_action_buffer_manager.add_action(action_tensor)
+                # action_tensor = action_tensor.squeeze().numpy()
+
+            action_tensor = torch.Tensor([-0.05, 0.05, 0.03, 0, 0, 0, 0.7])
 
             action_matrix = self.action_tensor_to_matrix(action_tensor)
             action_robot_matrix = self.cam_to_robot_frame(action_matrix)
@@ -159,7 +161,7 @@ class Controller:
                 gripper = self.gripper
             self.publisher.publish_action(action_robot, gripper)
 
-            wandb.log(self._update_log_keys(logs), step=self.step_n)
+            # wandb.log(self._update_log_keys(logs), step=self.step_n)
             run_for -= 1
             self.step_n += 1
 
@@ -168,25 +170,27 @@ class Controller:
         while run_for > 0:
             rate.sleep()
 
-            cv2_img, np_depth = self.subscriber.get_image_and_depth()
-            self.image_action_buffer_manager.add_image(cv2_img)
-            self.image_action_buffer_manager.add_depth(np_depth)
+            # cv2_img, np_depth = self.subscriber.get_image_and_depth()
+            # self.image_action_buffer_manager.add_image(cv2_img)
+            # self.image_action_buffer_manager.add_depth(np_depth)
 
-            with torch.no_grad():
-                input_tensor_sequence = (
-                    self.image_action_buffer_manager.get_input_tensor_sequence()
-                )
+            # with torch.no_grad():
+                # input_tensor_sequence = (
+                #     self.image_action_buffer_manager.get_input_tensor_sequence()
+                # )
 
-                input_tensor_sequence = (
-                    input_tensor_sequence[0].to(self.device).unsqueeze(0),
-                    input_tensor_sequence[1].to(self.device).unsqueeze(0),
-                    input_tensor_sequence[2].to(self.device).unsqueeze(0),
-                )
+                # input_tensor_sequence = (
+                #     input_tensor_sequence[0].to(self.device).unsqueeze(0),
+                #     input_tensor_sequence[1].to(self.device).unsqueeze(0),
+                #     input_tensor_sequence[2].to(self.device).unsqueeze(0),
+                # )
 
-                action_tensor, logs = self.model.step(input_tensor_sequence)
-                action_tensor = action_tensor.squeeze(0).cpu()
-                self.image_action_buffer_manager.add_action(action_tensor)
-                action_tensor = action_tensor.squeeze().numpy()
+                # action_tensor, logs = self.model.step(input_tensor_sequence)
+                # action_tensor = action_tensor.squeeze(0).cpu()
+                # self.image_action_buffer_manager.add_action(action_tensor)
+                # action_tensor = action_tensor.squeeze().numpy()
+            
+            action_tensor = torch.Tensor([-0.05, 0.05, 0.03, 0, 0, 0, 0.7])
 
             action_matrix = self.action_tensor_to_matrix(action_tensor)
             action_robot_matrix = self.cam_to_robot_frame(action_matrix)
@@ -199,7 +203,7 @@ class Controller:
                 gripper = self.gripper
             self.publisher.publish_action(action_robot, gripper)
 
-            wandb.log(self._update_log_keys(logs), step=self.step_n)
+            # wandb.log(self._update_log_keys(logs), step=self.step_n)
             run_for -= 1
             self.step_n += 1
 
@@ -215,7 +219,7 @@ class Controller:
         self.step_n = 0
         self.gripper = 1.0
         self.model.reset()
-        self.image_action_buffer_manager = self.create_buffer_manager()
+        # self.image_action_buffer_manager = self.create_buffer_manager()
 
     def _process_instruction(self, instruction):
         global schedule
@@ -254,8 +258,8 @@ class Controller:
 
     def _wait_for_publisher_subscriber(self):
         print("Waiting for publisher and subscriber to be ready..")
-        while hasattr(self.publisher, "uid") is False:
-            time.sleep(1)
+        # while hasattr(self.publisher, "uid") is False:
+        #     time.sleep(1)
         print("Publisher and subscriber ready..")
 
     def run(self):
